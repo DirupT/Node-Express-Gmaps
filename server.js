@@ -4,9 +4,12 @@ const fetch = require('node-fetch');
 
 const server = express();
 
-const API_KEY = config.key;
+const PLACES_API_KEY = config.placesKey;
 const SEARCH_PLACE_URL = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=';
 const SEARCH_DETAILS_URL = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=';
+
+const DISTANCE_API_KEY = config.distanceKey;
+const DISTANCE_MATRIX_URL = 'https://maps.googleapis.com/maps/api/distancematrix/json?';
 
 server.get('/', (req, res) => {
     res.send('Home');
@@ -14,7 +17,7 @@ server.get('/', (req, res) => {
 
 server.get('/place', (req, res) => {
     let searchQuery = req.query.search_query.split(' ').join('+');
-    let searchUrl = SEARCH_PLACE_URL + searchQuery + '&key=' + API_KEY;
+    let searchUrl = SEARCH_PLACE_URL + searchQuery + '&key=' + PLACES_API_KEY;
     fetch(searchUrl)
         .then(response => response.json())
         .then(response => {
@@ -25,6 +28,13 @@ server.get('/place', (req, res) => {
                 .catch(err => res.status(500).json({ error: "Couldn't receive the place details." }));
         })
         .catch(err => res.status(500).json({ error: "Couldnt receive the place details" }));
+})
+
+server.get('/travel/mode', (req, res) => {
+    const origins = req.query.origins;
+    const destinations = req.query.destinations;
+    const distanceUrl = DISTANCE_MATRIX_URL + 'origins=' + origins + '&destinations=' + destinations + '&mode=' + 'driving' + '&key=' + DISTANCE_API_KEY;
+    console.log(distanceUrl);  
 })
 
 server.listen(8001, () => console.log('Gmaps api running...'));
