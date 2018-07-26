@@ -21,7 +21,7 @@ server.get('/place', (req, res) => {
     fetch(searchUrl)
         .then(response => response.json())
         .then(response => {
-            let detailsUrl = SEARCH_DETAILS_URL + response.results[0].place_id + '&key=' + API_KEY;
+            let detailsUrl = SEARCH_DETAILS_URL + response.results[0].place_id + '&key=' + PLACES_API_KEY;
             fetch(detailsUrl)
                 .then(response => response.json())
                 .then(response => res.status(200).json(response.result))
@@ -40,10 +40,10 @@ server.get('/travel/mode', (req, res) => {
         fetch(distanceUrl)
             .then(response => response.json())
             .then(response => {
-                durations.push(response.rows[0].elements[0].duration)
+                durations.push({ duration: response.rows[0].elements[0].duration, mode: travelModes[i] });
                 if (durations.length === 4) {
-                    durations = durations.reduce((prev, cur) => cur.value < prev.value ? cur : prev);
-                    res.status(200).json({ travelDuration: durations.text });
+                    durations = durations.reduce((prev, cur) => cur.duration.value < prev.duration.value ? cur : prev);
+                    res.status(200).json({ travelDuration: durations.duration.text, travelMode: durations.mode });
                 }
             })
             .catch(err => res.status(500).json({ error: "Couldn't receieve the travel details" }));
