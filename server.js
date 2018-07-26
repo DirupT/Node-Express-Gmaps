@@ -33,8 +33,12 @@ server.get('/place', (req, res) => {
 server.get('/travel/mode', (req, res) => {
     const origins = req.query.origins;
     const destinations = req.query.destinations;
-    const distanceUrl = DISTANCE_MATRIX_URL + 'origins=' + origins + '&destinations=' + destinations + '&mode=' + 'driving' + '&key=' + DISTANCE_API_KEY;
-    console.log(distanceUrl);  
+    const travelModes = ['driving', 'walking', 'bicycling', 'transit'];
+    const distanceUrl = DISTANCE_MATRIX_URL + 'origins=' + origins + '&destinations=' + destinations + '&mode=' + travelModes[0] + '&key=' + DISTANCE_API_KEY;
+    fetch(distanceUrl)
+        .then(response => response.json())
+        .then(response => res.status(200).json(response))
+        .catch(err => res.status(500).json({ error: "Couldn't receieve the travel details" }));
 })
 
 server.listen(8001, () => console.log('Gmaps api running...'));
