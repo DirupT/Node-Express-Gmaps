@@ -34,11 +34,20 @@ server.get('/travel/mode', (req, res) => {
     const origins = req.query.origins;
     const destinations = req.query.destinations;
     const travelModes = ['driving', 'walking', 'bicycling', 'transit'];
-    const distanceUrl = DISTANCE_MATRIX_URL + 'origins=' + origins + '&destinations=' + destinations + '&mode=' + travelModes[0] + '&key=' + DISTANCE_API_KEY;
-    fetch(distanceUrl)
-        .then(response => response.json())
-        .then(response => res.status(200).json(response))
-        .catch(err => res.status(500).json({ error: "Couldn't receieve the travel details" }));
+    let durations = [];
+    for (let i = 0; i < 4; i++) {
+        const distanceUrl = DISTANCE_MATRIX_URL + 'origins=' + origins + '&destinations=' + destinations + '&mode=' + travelModes[i] + '&key=' + DISTANCE_API_KEY;
+        fetch(distanceUrl)
+            .then(response => response.json())
+            .then(response => {
+                durations.push(response.rows[0].elements[0].duration)
+                if (durations.length === 4) {
+                    durations = durations.reduce((prev, cur) => cur.value < prev.value ? cur : prev);
+                    res.status(200).json({ travelDuration: durations.text });
+                }
+            })
+            .catch(err => res.status(500).json({ error: "Couldn't receieve the travel details" }));
+    }
 })
 
 server.listen(8001, () => console.log('Gmaps api running...'));
